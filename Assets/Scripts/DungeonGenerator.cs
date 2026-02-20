@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class DungeonGenerator : MonoBehaviour
 {
-    RectInt baseRoom = new RectInt(0, 0, 100, 50);
+    RectInt baseRoom = new RectInt(0, 0, 200, 100);
     private bool splitHorizontally;
     List<RectInt> roomsToSplit = new List<RectInt>();
     List<RectInt> doneRooms = new List<RectInt>();
@@ -14,33 +14,37 @@ public class DungeonGenerator : MonoBehaviour
     public int minWidth;
     private RectInt roomA;
     private RectInt roomB;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
+    enum WayToSplit
+    {
+        instant, overTime, onButtonPress
+    }
+    [SerializeField] private WayToSplit wayToSplit;
     void Start()
     {
-        roomsToSplit.Add(baseRoom);
+        roomsToSplit.Add(baseRoom); //add the base room to the list so it can be split
         StartCoroutine(SplitCoroutine());
     }
 
-    // Update is called once per frame
     void Update()
     {
 
         foreach (RectInt room in roomsToSplit)
         {
-            AlgorithmsUtils.DebugRectInt(room, Color.yellow);
+            AlgorithmsUtils.DebugRectInt(room, Color.yellow); //drawing the rooms that still can be split in yellow
         }
         foreach (RectInt room in doneRooms)
         {
-            AlgorithmsUtils.DebugRectInt(room, Color.green);
+            AlgorithmsUtils.DebugRectInt(room, Color.green); //drawing the rooms that won't be split anymore in green
         }
 
     }
 
     private void SplitRoom()
     {
-        if (roomsToSplit[0].width > minWidth && roomsToSplit[0].height > minHeight)
+        if (roomsToSplit[0].width > minWidth && roomsToSplit[0].height > minHeight) //checking if the room that is going to be split is bigger then the minimum size
         {
-            if (Random.Range(0, 2) == 0)
+            if (Random.Range(0, 2) == 0) //randomly splitting it either horizontally or vertically
             {
                 splitHorizontally = true;
             }
@@ -98,8 +102,20 @@ public class DungeonGenerator : MonoBehaviour
     {
         while (roomsToSplit.Count > 0)
         {
-            yield return new WaitForSeconds(0.1f);
-            SplitRoom();
+            switch(wayToSplit)
+            {
+                case WayToSplit.instant: SplitRoom();
+                    break;
+                case WayToSplit.overTime:
+                    yield return new WaitForSeconds(0.1f);
+                    SplitRoom();
+                    break;
+                case WayToSplit.onButtonPress:
+                    yield return new WaitUntil(()=> Input.GetKeyDown(KeyCode.Space)) ;
+                    SplitRoom();
+                    break;
+            }
+
         }
 
     }
