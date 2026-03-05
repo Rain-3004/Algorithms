@@ -7,9 +7,8 @@ using UnityEngine;
 public class DungeonGenerator : MonoBehaviour
 {
     RectInt baseRoom = new RectInt(0, 0, 200, 100);
-    private bool splitHorizontally;
-    List<RectInt> roomsToSplit = new List<RectInt>();
-    List<RectInt> doneRooms = new List<RectInt>();
+    List<RectInt> roomsToSplit = new();
+    List<RectInt> doneRooms = new();
     public int minHeight;
     public int minWidth;
     private RectInt roomA;
@@ -42,62 +41,47 @@ public class DungeonGenerator : MonoBehaviour
 
     private void SplitRoom()
     {
-        if (roomsToSplit[0].width > minWidth && roomsToSplit[0].height > minHeight) //checking if the room that is going to be split is bigger then the minimum size
+        if (roomsToSplit[0].height <= minHeight && roomsToSplit[0].width > minWidth) { splitRoomVertcally(); }
+        else if (roomsToSplit[0].width <= minWidth && roomsToSplit[0].height > minHeight) { splitRoomHorizontally(); }
+        else if (roomsToSplit[0].height > minHeight && roomsToSplit[0].width > minWidth)
         {
-            if (Random.Range(0, 2) == 0) //randomly splitting it either horizontally or vertically
-            {
-                splitHorizontally = true;
-            }
-            else { splitHorizontally = false; }
-            if (splitHorizontally == true)
-            {
-                Debug.Log("original " + roomsToSplit[0]);
-                RectInt roomA = new RectInt(roomsToSplit[0].xMin, roomsToSplit[0].yMin, roomsToSplit[0].width, roomsToSplit[0].height / 2 + 1);
-                Debug.Log("room A " + roomA);
-                roomsToSplit.Add(roomA);
-                if (roomsToSplit[0].height / 2 - 1 < roomsToSplit[0].yMin)
-                {
-                    RectInt roomB = new RectInt(roomsToSplit[0].xMin, roomsToSplit[0].height / 2 - 1 + roomsToSplit[0].yMin, roomsToSplit[0].width, roomsToSplit[0].height / 2 + 1);
-                    roomsToSplit.Add(roomB);
-                    Debug.Log("room B " + roomB);
-                }
-                else
-                {
-                    RectInt roomB = new RectInt(roomsToSplit[0].xMin, roomsToSplit[0].height / 2 - 1, roomsToSplit[0].width, roomsToSplit[0].height / 2 + 1);
-                    roomsToSplit.Add(roomB);
-                    Debug.Log("room B " + roomB);
-                }
-                roomsToSplit.Remove(roomsToSplit[0]);
-            }
-            if (splitHorizontally == false)
-            {
-                Debug.Log("original " + roomsToSplit[0]);
-                RectInt roomA = new RectInt(roomsToSplit[0].xMin, roomsToSplit[0].yMin, roomsToSplit[0].width / 2 + 1, roomsToSplit[0].height);
-                roomsToSplit.Add(roomA);
-                Debug.Log("room A " + roomA);
-                if (roomsToSplit[0].width / 2 - 1 < roomsToSplit[0].xMin)
-                {
-                    RectInt roomB = new RectInt(roomsToSplit[0].width / 2 - 1 + roomsToSplit[0].xMin, roomsToSplit[0].yMin, roomsToSplit[0].width / 2 + 1, roomsToSplit[0].height);
-                    roomsToSplit.Add(roomB);
-                    Debug.Log("room B " + roomB);
-                }
-                else
-                {
-                    RectInt roomB = new RectInt(roomsToSplit[0].width / 2 - 1, roomsToSplit[0].yMin, roomsToSplit[0].width / 2 + 1, roomsToSplit[0].height);
-                    roomsToSplit.Add(roomB);
-                    Debug.Log("room B " + roomB);
-                }
-                roomsToSplit.Remove(roomsToSplit[0]);
-            }
+            if(Random.Range(0,2) == 0) {splitRoomHorizontally();}
+            else {splitRoomVertcally(); }
         }
         else
         {
-            RectInt doneRoom = roomsToSplit[0];
-            doneRooms.Add(doneRoom);
+            doneRooms.Add(roomsToSplit[0]);
             roomsToSplit.Remove(roomsToSplit[0]);
         }
     }
 
+    private void splitRoomHorizontally()
+    {
+        int x = Random.Range(roomsToSplit[0].yMin + minHeight, roomsToSplit[0].height - minHeight + 1);
+        Debug.Log("original " + roomsToSplit[0]);
+        RectInt roomA = new RectInt(roomsToSplit[0].xMin, roomsToSplit[0].yMin, roomsToSplit[0].width,roomsToSplit[0].height - x);
+        Debug.Log("room A " + roomA);
+        roomsToSplit.Add(roomA);
+   
+        RectInt roomB = new RectInt(roomsToSplit[0].xMin, roomsToSplit[0].height - x, roomsToSplit[0].width, x);
+        roomsToSplit.Add(roomB);
+        Debug.Log("room B " + roomB);
+        roomsToSplit.Remove(roomsToSplit[0]);
+    }
+
+    private void splitRoomVertcally()
+    {
+        int y = Random.Range(roomsToSplit[0].xMin + minWidth, roomsToSplit[0].width - minWidth + 1);
+        Debug.Log("original " + roomsToSplit[0]);
+        RectInt roomA = new RectInt(roomsToSplit[0].xMin, roomsToSplit[0].yMin, roomsToSplit[0].width - y, roomsToSplit[0].height);
+        roomsToSplit.Add(roomA);
+        Debug.Log("room A " + roomA);
+ 
+        RectInt roomB = new RectInt(roomsToSplit[0].width - y, roomsToSplit[0].yMin, y, roomsToSplit[0].height);
+        roomsToSplit.Add(roomB);
+        Debug.Log("room B " + roomB);
+        roomsToSplit.Remove(roomsToSplit[0]);
+    }
     IEnumerator SplitCoroutine()
     {
         while (roomsToSplit.Count > 0)
