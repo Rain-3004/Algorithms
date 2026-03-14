@@ -337,8 +337,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c37828715a91276489fdd79f1ccb11d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minHeight: 10
-  minWidth: 5
+  minHeight: 5
+  minWidth: 10
+  wayToSplit: 2
 --- !u!4 &849482551
 Transform:
   m_ObjectHideFlags: 0
